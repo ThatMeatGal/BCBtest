@@ -1,0 +1,66 @@
+---
+title: "learn data"
+format:
+  pdf:
+    warning: FALSE
+    keep-tex: true
+    include-in-header: 
+       text: |
+         \usepackage{fvextra}
+         \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+include-before-body:
+  text: |
+    \RecustomVerbatimEnvironment{verbatim}{Verbatim}{
+      showspaces = false,
+      showtabs = false,
+      breaksymbolleft={},
+      breaklines
+      % Note: setting commandchars=\\\{\} here will cause an error 
+    }
+editor: source
+---
+
+## Data Preparation
+
+```{r, 'load packages'}
+suppressMessages({
+  library(dplyr)
+  library(tidyr)
+  library(here)
+  library(readxl)
+  library(ordinal)
+  library(emmeans)
+  library(nlme)
+  library(car)
+  library(ggplot2)
+  library(RVAideMemoire)})
+```
+
+```{r, 'sensory'}
+data <-read_excel(here::here("data", "data.xlsx"),na="NA") %>% 
+  drop_na(animal,trt,location,panelist) %>%
+  rename("eval" = "panelist") %>%
+  mutate(location = as.factor(location), 
+         animal = as.factor(animal), 
+         trt = as.factor(trt), 
+         eval = factor(eval),
+         faccept = as.factor(accept),
+         ftender = as.factor(tender),
+         fjuicy = as.factor(juicy),
+         fflavor = as.factor(flavor)) |>
+  mutate(sample = paste(animal, location, side, trt, sep = "_"))
+```
+
+```{r, results='hide'}
+any(is.na(data))
+
+table(data$accept)
+table(data$tender)
+table(data$juicy)
+table(data$flavor)
+
+table(data$faccept)
+table(data$ftender)
+table(data$fjuicy)
+table(data$fflavor)
+```
