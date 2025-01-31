@@ -1,5 +1,5 @@
 ---
-title: "learn data"
+title: "BCB520 Test Codes"
 format:
   pdf:
     warning: FALSE
@@ -24,43 +24,53 @@ editor: source
 
 ```{r, 'load packages'}
 suppressMessages({
-  library(dplyr)
-  library(tidyr)
   library(here)
   library(readxl)
-  library(ordinal)
-  library(emmeans)
-  library(nlme)
+  library(dplyr)
+  library(tidyr)
+  library(brms)
   library(car)
-  library(ggplot2)
-  library(RVAideMemoire)})
+  library(ggplot2)})
 ```
 
-```{r, 'sensory'}
-data <-read_excel(here::here("data", "data.xlsx"),na="NA") %>% 
-  drop_na(animal,trt,location,panelist) %>%
-  rename("eval" = "panelist") %>%
-  mutate(location = as.factor(location), 
-         animal = as.factor(animal), 
+```{r, 'data'}
+data <- read_excel(here::here("data", "viz_data.xlsx"), na="NA") |> 
+  mutate(day = factor(day, levels = sort(as.numeric(unique(day))), ordered = TRUE), 
+         location = as.factor(location), 
+         primal = as.factor(primal), 
          trt = as.factor(trt), 
-         eval = factor(eval),
-         faccept = as.factor(accept),
-         ftender = as.factor(tender),
-         fjuicy = as.factor(juicy),
-         fflavor = as.factor(flavor)) |>
-  mutate(sample = paste(animal, location, side, trt, sep = "_"))
+         eval = factor(eval, levels = unique(eval)),
+         flean = as.factor(lean),
+         fbrown = as.factor(brown),
+         fdisc = as.factor(disc),
+         fsurface = as.factor(surface),
+         funi = as.factor(uni)) |>
+  mutate(sample = paste(primal, location, trt, sep = "_")) |>
+  na.exclude()  
 ```
 
-```{r, results='hide'}
+```{r, results='hide', echo=FALSE}
+#Checking data/missing values with tables
 any(is.na(data))
+table(data$day)
 
-table(data$accept)
-table(data$tender)
-table(data$juicy)
-table(data$flavor)
+table(data$lean)
+table(data$brown)
+table(data$disc)
+table(data$surface)
+table(data$uni)
 
-table(data$faccept)
-table(data$ftender)
-table(data$fjuicy)
-table(data$fflavor)
+table(data$flean)
+table(data$fbrown)
+table(data$fdisc)
+table(data$fsurface)
+table(data$funi)
+```
+## Eval differences
+```{r, 'viz'}
+ggplot2::ggplot(data, aes(x = day, y = lean, fill = eval)) + 
+  geom_boxplot() +
+  labs(x = "Retail Day", y = "Lean Color", fill = "Evaluator") +
+  scale_y_continuous(limits = c(1,8), breaks = seq(1,8, by = 0.5)) +
+  theme_bw()
 ```
